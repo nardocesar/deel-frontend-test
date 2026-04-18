@@ -1,11 +1,16 @@
 ## 1. What is the difference between Component and PureComponent? give an example where it might break my app.
 
-The difference between Component and PureComponent is that PureComponent performs a shallow comparison of props and state, and only re-renders if there are differences, whereas Component always re-renders when the setState method is called.
-For example, let's say you have a large dataset that is passed down to a child component as a prop. If you use a Component instead of a PureComponent, the child component will re-render every time the parent component re-renders, even if the dataset is unchanged. This can result in a lot of unnecessary re-renders and slow down your app.
+The main difference between `Component` and `PureComponent` is that `PureComponent` implements a `shouldComponentUpdate` (or `React.memo` in functional components) method that performs a shallow comparison of props and state before re-rendering, whereas `Component` always re-renders when its parent component re-renders, regardless there's updates.
+
+In some cases, using `PureComponent` can cause issues because it only performs a shallow comparison. For example, if you have an array of objects as a prop, and the reference to the array changes but the content of the array does not, `PureComponent` will still re-render, which may be inefficient.
+
+In this case, it may be better to use `Component` or implement a custom `shouldComponentUpdate` method that performs a deep comparison of the array.
 
 ## 2. Context + ShouldComponentUpdate might be dangerous. Can think of why is that?
 
-Context is used to pass data down the component tree without having to pass props down manually at every level. However, using Context in combination with ShouldComponentUpdate can be dangerous because if you don't update the shouldComponentUpdate method properly, it can lead to unexpected behavior and bugs.
+When using the `Context` API in combination with `shouldComponentUpdate`, it is possible to accidentally cause an infinite loop of re-renders. This can happen if the `Context` value is changed in a way that does not trigger a re-render of the component, but still causes the component to receive a new context value via the contextType API or the `useContext` hook.
+
+To avoid this issue, it is recommended to avoid using `shouldComponentUpdate` when using the Context API or to ensure that any changes to the Context value trigger a re-render of the component.
 
 ## 3. Describe 3 ways to pass information from a component to its PARENT.
 
@@ -19,10 +24,8 @@ Context: If the child component is several levels deep in the component tree, yo
 
 ## 4. Give 2 ways to prevent components from re-rendering.
 
-Two ways to prevent components from re-rendering are:
-Use PureComponent instead of Component when possible.
-
-Use the shouldComponentUpdate lifecycle method to manually check if the component needs to re-render. This method should return a boolean value indicating whether the component should re-render or not based on the new props and state.
+Use `PureComponent` instead of `Component` when possible.
+Use the `useMemo` hook to memoize a value so that it is only recomputed when its dependencies change. This can be useful for expensive computations that don't need to be recalculated on every render.
 
 ## 5. What is a fragment and why do we need it? Give an example where it might break my app.
 
@@ -33,7 +36,8 @@ Using a fragment won't break your app, but if you're using an older version of R
 
 ## 6. Give 3 examples of the HOC pattern.
 
-Three examples of the Higher Order Component (HOC) pattern are:
+Three examples of the Higher Order Component (HOC):
+
 WithAuth: An HOC that adds authentication to a component. The HOC would check if the user is authenticated and either render the component or redirect to the login page.
 
 WithTheme: An HOC that adds a theme to a component. The HOC would pass down a theme object as a prop to the component, allowing it to use the theme's styles.
@@ -69,4 +73,4 @@ CSS-in-JS libraries like styled-components or emotion.
 
 ## 11. How to render an HTML string coming from the server.
 
-To render an HTML string from the server, you can use the dangerouslySetInnerHTML prop in React. This prop takes an object with a \_\_html property containing the HTML string, which is then rendered as raw HTML. However, it is important to use this prop with caution and only when necessary, as it can be a security risk if used improperly. It is recommended to use server-side rendering or sanitize the HTML string before rendering it.
+To render an HTML string from the server, you can use the `dangerouslySetInnerHTML` prop in React, which is highly unrecommended and dangerous.
